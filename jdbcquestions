@@ -1,0 +1,352 @@
+Creation and insertion
+
+import java.sql.*;
+
+public class Productdb
+{
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:sqlserver://localhost:1433;databaseName=Productdb;encrypt=true;trustServerCertificate=true",
+                "sa",
+                "StrongPass@123");
+
+            Statement st = con.createStatement();
+
+            // Category Table
+            st.executeUpdate(
+                "CREATE TABLE Category(" +
+                "CatId INT PRIMARY KEY," +
+                "CatDesc VARCHAR(50))");
+
+            // Product Table
+            st.executeUpdate(
+                "CREATE TABLE Product(" +
+                "ProdId INT PRIMARY KEY," +
+                "ProdName VARCHAR(50)," +
+                "Price DECIMAL(10,2)," +
+                "CatId INT," +
+                "FOREIGN KEY(CatId) REFERENCES Category(CatId))");
+
+            // Sales Table
+            st.executeUpdate(
+                "CREATE TABLE Sales(" +
+                "SaleId INT PRIMARY KEY," +
+                "ProdId INT," +
+                "Qty INT," +
+                "SaleDate DATE," +
+                "FOREIGN KEY(ProdId) REFERENCES Product(ProdId))");
+
+            System.out.println("Tables Created Successfully");
+
+            // Insert into Category
+            st.executeUpdate(
+                "INSERT INTO Category VALUES(1,'Electronics')");
+
+            st.executeUpdate(
+                "INSERT INTO Category VALUES(2,'Books')");
+
+            st.executeUpdate(
+                "INSERT INTO Category VALUES(3,'Clothing')");
+
+            // Insert into Product
+            st.executeUpdate(
+                "INSERT INTO Product VALUES(101,'Laptop',50000,1)");
+
+            st.executeUpdate(
+                "INSERT INTO Product VALUES(102,'Mobile',25000,1)");
+
+            st.executeUpdate(
+                "INSERT INTO Product VALUES(103,'Java Book',500,2)");
+
+            // Insert into Sales
+            st.executeUpdate(
+                "INSERT INTO Sales VALUES(1,101,2,'2026-06-01')");
+
+            st.executeUpdate(
+                "INSERT INTO Sales VALUES(2,102,1,'2026-06-02')");
+
+            System.out.println("Records Inserted Successfully");
+
+            st.close();
+            con.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
+
+JDBC QUESTIONS
+
+1)
+import java.sql.*;
+import java.util.Scanner;
+
+public class Ques1
+{
+    public static void main(String args[])
+    {
+        Scanner sc = new Scanner(System.in);
+
+        try
+        {
+            System.out.println("Enter Product Id:");
+            int idd = sc.nextInt();
+
+            System.out.println("Enter New Product Name:");
+            String pname = sc.next();
+
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:sqlserver://localhost:1433;databaseName=ProductDB;encrypt=true;trustServerCertificate=true",
+                "sa",
+                "StrongPass@123");
+
+            PreparedStatement ps =
+                con.prepareStatement("UPDATE Product SET ProdName=? WHERE ProdId=?");
+
+
+
+            ps.setString(1, pname);
+            ps.setInt(2, idd);
+
+            int rows = ps.executeUpdate();
+
+            if(rows > 0)
+                System.out.println("Record Updated Successfully");
+            else
+                System.out.println("Product Not Found");
+
+            ps.close();
+            con.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+2)
+import java.sql.*;
+
+public class Ques2
+{
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:sqlserver://localhost:1433;databaseName=ProductDB;encrypt=true;trustServerCertificate=true",
+                "sa",
+                "StrongPass@123");
+
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT C.CatDesc, AVG(P.Price) AS AvgPrice " +
+                "FROM Category C " +
+                "JOIN Product P ON C.CatId = P.CatId " +
+                "GROUP BY C.CatDesc");
+
+            ResultSet rs = ps.executeQuery();
+
+            System.out.println("Category\tAverage Price");
+            System.out.println("---------------------------");
+
+            while(rs.next())
+            {
+                String category = rs.getString("CatDesc");
+                double avgPrice = rs.getDouble("AvgPrice");
+
+                System.out.println(category + "\t" + avgPrice);
+            }
+
+            rs.close();
+            ps.close();
+            con.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
+
+3)
+import java.sql.*;
+import java.util.Scanner;
+
+public class Ques3
+{
+    public static void main(String args[])
+    {
+        Scanner sc = new Scanner(System.in);
+
+        try
+        {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:sqlserver://localhost:1433;databaseName=Productdb;encrypt=true;trustServerCertificate=true",
+                "sa",
+                "StrongPass@123");
+
+            System.out.print("Enter Product Id: ");
+            int pid = sc.nextInt();
+
+            System.out.print("Enter Product Name: ");
+            String pname = sc.next();
+
+            System.out.print("Enter Price: ");
+            double price = sc.nextDouble();
+
+            System.out.print("Enter Category Id: ");
+            int cid = sc.nextInt();
+
+            PreparedStatement ps =
+                con.prepareStatement(
+                    "INSERT INTO Product VALUES(?,?,?,?)");
+
+            ps.setInt(1, pid);
+            ps.setString(2, pname);
+            ps.setDouble(3, price);
+            ps.setInt(4, cid);
+
+            int rows = ps.executeUpdate();
+
+            System.out.println(rows + " Record Inserted");
+
+            ps.close();
+            con.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
+
+4)
+import java.sql.*;
+import java.util.Scanner;
+
+public class Ques4
+{
+    public static void main(String args[])
+    {
+        Scanner sc = new Scanner(System.in);
+
+        try
+        {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:sqlserver://localhost:1433;databaseName=Productdb;encrypt=true;trustServerCertificate=true",
+                "sa",
+                "StrongPass@123");
+
+            System.out.print("Enter Sale Id: ");
+            int sid = sc.nextInt();
+
+            System.out.print("Enter Product Id: ");
+            int pid = sc.nextInt();
+
+            System.out.print("Enter Quantity: ");
+            int qty = sc.nextInt();
+
+            System.out.print("Enter Sale Date (yyyy-mm-dd): ");
+            String date = sc.next();
+
+            PreparedStatement ps =
+                con.prepareStatement(
+                    "INSERT INTO Sales VALUES(?,?,?,?)");
+
+            ps.setInt(1, sid);
+            ps.setInt(2, pid);
+            ps.setInt(3, qty);
+            ps.setDate(4, Date.valueOf(date));
+
+            int rows = ps.executeUpdate();
+
+            System.out.println(rows + " Sale Record Inserted");
+
+            ps.close();
+            con.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
+
+5)
+import java.sql.*;
+
+public class Ques5
+{
+    public static void main(String args[])
+    {
+        try
+        {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:sqlserver://localhost:1433;databaseName=Productdb;encrypt=true;trustServerCertificate=true",
+                "sa",
+                "StrongPass@123");
+
+            con.setAutoCommit(false);
+
+            try
+            {
+                PreparedStatement ps1 =
+                    con.prepareStatement(
+                        "INSERT INTO Sales VALUES(?,?,?,GETDATE())");
+
+                ps1.setInt(1, 4);
+                ps1.setInt(2, 101);
+                ps1.setInt(3, 1);
+
+                ps1.executeUpdate();
+
+                PreparedStatement ps2 =
+                    con.prepareStatement(
+                        "INSERT INTO Sales VALUES(?,?,?,GETDATE())");
+
+                ps2.setInt(1, 5);
+                ps2.setInt(2, 102);
+                ps2.setInt(3, 1);
+
+                ps2.executeUpdate();
+
+                con.commit();
+
+                System.out.println(
+                    "Transaction Successful - Commit Done");
+            }
+            catch(Exception e)
+            {
+                con.rollback();
+
+                System.out.println(
+                    "Transaction Failed - Rollback Done");
+            }
+
+            con.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
