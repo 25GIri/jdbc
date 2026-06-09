@@ -160,7 +160,7 @@ public class Ques2
             ResultSet rs = ps.executeQuery();
 
             System.out.println("Category\tAverage Price");
-            System.out.println("---------------------------");
+            
 
             while(rs.next())
             {
